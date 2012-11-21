@@ -1,4 +1,4 @@
-dorgen
+DorGen
 ======
 
 Text generator from keywords
