@@ -4,8 +4,18 @@
 
 class KWHandler:
 
-    def __init__(self, list, file):
-        pass
+    def __init__(self, theList, theFile):
+        self.variant = theList
+        self.file = theFile
 
-    def process(self):
-        pass
+    def handle(self):
+        return self.__getContext()
+
+    def __getContext()
+        file = open(self.theFile)
+        while True:
+          line = file.readline()
+          if not line:
+            file.close()
+            break
+          yield line

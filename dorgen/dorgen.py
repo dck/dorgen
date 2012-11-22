@@ -19,6 +19,8 @@ class Dorgen:
             raise FileError(text)
         print "[OK] Read %s file" % text
 
+        if not os.access(kw, os.R_OK):
+            raise FileError(kw)
         self.kw = kw
         print "[OK] Read %s file" % kw
 
@@ -40,13 +42,13 @@ class Dorgen:
         if not os.access(f, os.W_OK):
             raise FolderAccessError(f)
         print "[OK] Deploy folder is %s" % f
-        if not os.access(kw, os.R_OK):
-            raise FileError(kw)
+
 
     def run(self):
         tg = TextGenerator(self.text)
         variants = tg.generate()
-        print variants
+        kwh = KWHandler(variants, self.kw)
+        print kwh.handle()
 
     def generate_dict(self):
         pass
