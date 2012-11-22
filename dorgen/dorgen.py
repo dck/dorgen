@@ -3,14 +3,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from exceptions import *
 
 class Dorgen:
 
-    def __init__(self):
-        pass
+    def __init__(self, text, kw, template, deploy = "."):
+        try:
+            with open(text, "r") as f:
+                self.text = f.read()
+        except Exception as e:
+            raise FileError(text)
 
-    def parse(self):
-        pass
+    def run(self):
+         pass
 
     def generate_dict(self):
         pass
