@@ -107,5 +107,5 @@ try:
     dorgen = dorgen.Dorgen(*argv[:4])
     dorgen.run()
 except Error as e:
-    print "Error while excecuting the script"
+    print "[FAIL] Error while excecuting the script"
     print e
