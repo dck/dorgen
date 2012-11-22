@@ -4,7 +4,7 @@
 # -*- coding: utf-8 -*-
 
 from exceptions import *
-
+import os
 class Dorgen:
 
     def __init__(self, text, kw, template, deploy = "."):
@@ -13,6 +13,22 @@ class Dorgen:
                 self.text = f.read()
         except Exception as e:
             raise FileError(text)
+
+        try:
+            with open(template, "r") as f:
+                self.template = f.read()
+        except Exception as e:
+            raise FileError(template)
+
+        f = os.path.abspath(deploy)
+        print f
+        if not os.path.exists(f):
+            os.makedirs(f)
+        if not os.access(f, os.W_OK):
+            raise FolderAccessError(f)
+        if not os.access(kw, os.R_OK):
+            raise FileError(kw)
+        self.kw = kw
 
     def run(self):
          pass
