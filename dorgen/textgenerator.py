@@ -4,13 +4,10 @@
 
 class TextGenerator:
 
-    def __init__(self, template):
-        self.template = template
+    def __init__(self):
+        pass
 
-    def set_template(self, template):
-        self.template = template
-
-    def generate(self):
+    def generate(self, template):
         return ["I want to eat %kw%",
                 "I want to test %kw%",
                 "I want to listen to %kw%",

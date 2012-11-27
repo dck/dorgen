@@ -42,22 +42,17 @@ class Dorgen:
                 raise FolderAccessError(f)              
         if not os.access(f, os.W_OK):
             raise FolderAccessError(f)
+        self.deploy = f
         print "[OK] Deploy folder is %s" % f
 
 
     def run(self):
-        tg = TextGenerator(self.text)
-        variants = tg.generate()
+        tg = TextGenerator()
+        variants = tg.generate(self.text)
         print "[OK] Generated %d variants of the text" % len(variants) 
         kwh = KWHandler(self.kw)
         print "[OK] Read %d keywords" % kwh.count()
         data = kwh.get_dg_data(variants)
         dgdata = DgData(data)
-        t = Templater()
-        t.run(dgdata)
-
-    def generate_dict(self):
-        pass
-
-    def output(self):
-        pass
+        t = Templater(text = self.template, data = dgdata, deploy = self.deploy)
+        t.run()

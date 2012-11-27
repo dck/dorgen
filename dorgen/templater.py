@@ -4,8 +4,10 @@
 
 class Templater:
 
-    def __init__(self):
-        pass
+    def __init__(self, text, data, deploy = "."):
+        self.text = text
+        self.data = data
+        self.deploy = deploy
 
-    def run(self, dgd):
+    def run(self):
         pass
