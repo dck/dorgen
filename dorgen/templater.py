@@ -7,8 +7,5 @@ class Templater:
     def __init__(self):
         pass
 
-    def set_dict(self, dictionary):
-        pass
-
-    def return_files_structure(self):
+    def run(self, dgd):
         pass

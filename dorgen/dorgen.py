@@ -8,6 +8,7 @@ from exceptions import *
 from textgenerator import TextGenerator
 from kwshandler import KWHandler
 from templater import Templater
+from dgdata import DgData
 
 class Dorgen:
 
@@ -47,8 +48,13 @@ class Dorgen:
     def run(self):
         tg = TextGenerator(self.text)
         variants = tg.generate()
-        kwh = KWHandler(variants, self.kw)
-        print kwh.handle()
+        print "[OK] Generated %d variants of the text" % len(variants) 
+        kwh = KWHandler(self.kw)
+        print "[OK] Read %d keywords" % kwh.count()
+        data = kwh.get_dg_data(variants)
+        dgdata = DgData(data)
+        t = Templater()
+        t.run(dgdata)
 
     def generate_dict(self):
         pass
