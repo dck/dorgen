@@ -29,3 +29,14 @@ class GotZeroKeyWords(Error):
         pass
     def __str__(self):
         return "[FAIL] No keyword found. Please write some keywords to file"
+
+class ParsingError(Error):
+    def __init__(self, parse_exception):
+        self.e = parse_exception
+    def __str__(self):
+        s  = "[FAIL] Error while parsing text file"
+        s += "\n[FAIL] " + self.e.line
+        s += "\n[FAIL] " + " " * (self.e.column-1) + "^"
+        s += "\n[FAIL] " + str(self.e)
+        s += "\n"
+        return s

@@ -10,4 +10,4 @@ class Templater:
         self.deploy = deploy
 
     def run(self):
-        pass
+        print self.data.get_all()

@@ -14,3 +14,6 @@ class DgData:
     def get_kws(self):
         return [e[0] for e in self.vars]
 
+    def get_all(self):
+        return self.vars
+

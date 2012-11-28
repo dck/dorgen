@@ -4,6 +4,3 @@ father
 brother
 sister
 dad
-huy
-list
-fastfood
