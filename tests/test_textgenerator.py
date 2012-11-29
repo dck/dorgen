@@ -22,9 +22,3 @@ class TestTextGenerator(unittest.TestCase):
         need = sorted(["1 %kw% 3", "1 %kw% 4", "2 %kw% 3", "2 %kw% 4"])
         res = sorted(self.generator.generate(t))
         self.assertEqual(need, res)
-
-    def test_multilevel_generation(self):
-        t = "{1|2{a|b}} {4|5}"
-        need = sorted(["1 4", "2a 4", "2b 4", "1 5", "2a 5", "2b 5"])
-        res = sorted(self.generator.generate(t))
-        self.assertEqual(need, res)

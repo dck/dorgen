@@ -40,3 +40,9 @@ class ParsingError(Error):
         s += "\n[FAIL] " + str(self.e)
         s += "\n"
         return s
+
+class BadTemplateGiven(Error):
+    def __init__(self, reason):
+        self.reason = reason
+    def __str__(self):
+        return "[FAIL] Incorrect template\n[FAIL] %s" % self.reason.capitalize()

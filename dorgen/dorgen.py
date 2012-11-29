@@ -12,7 +12,7 @@ from dgdata import DgData
 
 class Dorgen:
 
-    def __init__(self, text, kw, template, deploy = "."):
+    def __init__(self, text, kw, template = "templates", deploy = "."):
         try:
             with open(text, "r") as f:
                 self.text = f.read()
@@ -25,13 +25,13 @@ class Dorgen:
         self.kw = kw
         print "[OK] Read %s file" % kw
 
-        try:
-            with open(template, "r") as f:
-                self.template = f.read()
-        except Exception as e:
-            raise FileError(template)
-
-        print "[OK] Read %s file" % template
+        t = os.path.abspath(template)
+        if not os.path.exists(t):
+            raise FolderNotFound(t)           
+        if not os.access(t, os.R_OK):
+            raise FolderAccessError(f)
+        self.template_folder = t
+        print "[OK] Template folder is %s" % t
 
         f = os.path.abspath(deploy)
         if not os.path.exists(f):
@@ -42,7 +42,7 @@ class Dorgen:
                 raise FolderAccessError(f)              
         if not os.access(f, os.W_OK):
             raise FolderAccessError(f)
-        self.deploy = f
+        self.deploy_folder = f
         print "[OK] Deploy folder is %s" % f
 
 
@@ -52,7 +52,7 @@ class Dorgen:
         print "[OK] Generated %d variants of the text" % len(variants) 
         kwh = KWHandler(self.kw)
         print "[OK] Read %d keywords" % kwh.count()
-        dataDict = kwh.get_dg_data(variants)
-        dgdata = DgData(dataDict)
-        t = Templater(text = self.template, data = dgdata, deploy = self.deploy)
-        t.run()
+        data = kwh.get_dg_data(variants)
+        dgdata = DgData(data)
+        t = Templater(template_folder = self.template_folder, tgdata = dgdata, deploy_folder = self.deploy_folder)
+        t.serialize()

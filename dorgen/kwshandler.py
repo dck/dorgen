@@ -26,7 +26,7 @@ class KWHandler:
         newTexts = texts[:]
         for kw in self.kws:
             value = newTexts[0].replace(KEYWORD, kw)
-            data.append((kw, value))
+            data.append(dict(keyword = kw, text = value))
             del newTexts[0]
             if len(newTexts) == 0:
                 newTexts = texts[:]
