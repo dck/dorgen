@@ -15,7 +15,7 @@ class Dorgen:
     def __init__(self, text, kw, template = "templates", deploy = "."):
         try:
             with open(text, "r") as f:
-                self.text = f.read()
+                self.text = f.read().decode("utf8")
         except Exception as e:
             raise FileError(text)
         print "[OK] Read %s file" % text

@@ -51,3 +51,16 @@ body {
  position: relative;
 }
 .clear { clear: both; background: none; }
+
+.text{
+    color: #000;
+    padding: 50px;
+}
+
+.links a{
+    color: #f00;
+}
+.links a:hover
+{
+    color: #f99;
+}

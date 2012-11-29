@@ -11,7 +11,7 @@ class KWHandler:
         self.file = theFile
         with open(self.file) as f:
             lines = f.readlines()
-        self.kws = filter(None, [e.strip() for e in lines])
+        self.kws = filter(None, [e.strip().decode("utf8") for e in lines])
         if len(self.kws) == 0:
             raise GotZeroKeyWords()
 

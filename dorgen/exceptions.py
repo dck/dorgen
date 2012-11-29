@@ -46,3 +46,9 @@ class BadTemplateGiven(Error):
         self.reason = reason
     def __str__(self):
         return "[FAIL] Incorrect template\n[FAIL] %s" % self.reason.capitalize()
+
+class ErrorInKeywords(Error):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "[FAIL] Look at keywords file. Bad characters found"

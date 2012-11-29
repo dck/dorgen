@@ -9,6 +9,7 @@ from shutil import copy2, copytree
 re_kw   = re.compile(r"%key%", re.I|re.S|re.X)
 re_text = re.compile(r"%text%", re.I|re.S|re.X)
 re_map  = re.compile(r"%map%", re.I|re.S|re.X)
+re_links  = re.compile(r"%links_(\d+)%", re.I|re.S|re.X)
 
 templates = {
     "page": "",
@@ -64,13 +65,39 @@ class Templater:
                 raise BadTemplateGiven("Template file is empty")
 
     def __output(self):
+        with cd(self.deploy_folder):
+            for e in self.data.iterable():
+                with open(e["file"], "w") as f:
+                    f.write(e["content"])
+                    print "[OK] File %s is created" % f.name
+                    #e["Created"] = True
+            self.__make_site_map()
+
+
+    def __make_site_map(self):
+        links_str = ""
         for e in self.data.iterable():
-            txt = self.text
-            with open(e["keyword"] + ".html", "w") as f:
-                txt = re.sub(re_kw, e["keyword"], txt)
-                txt = re.sub(re_text, e["text"], txt)
-                f.write(txt)
+            links_str += "<a href = '%s'> %s </a><br />" % (e["file"], e["keyword"].capitalize()) 
+        
+        pagetext = re.sub(re_map, links_str.encode("utf8"), templates["catalog"])
+
+        with open("catalog.html", "w") as f:
+            f.write(pagetext)
+            print "[OK] Sitemap is created"
 
     def serialize(self):
         self.__create_enviroment()
         self.__check_template()
+        for e in self.data.iterable():
+            pagetext = re.sub(re_kw, e["keyword"].capitalize().encode("utf8"), templates["page"])
+            pagetext = re.sub(re_text, e["text"].encode("utf8"), pagetext)
+            pagetext = re.sub(re_map, "<a href = 'catalog.html'>Карта сайта</a>", pagetext)
+            m = re_links.search(pagetext)
+            if m:
+                self.data.make_links(int(m.group(1)))
+                links = [("<a href = '%s'> %s </a><br />" % (el, self.data.get_keyword_by_filename(el).capitalize())) for el in self.data.get_links_by_element(e)]
+                links = '\n'.join(links)
+                pagetext = re.sub(re_links, links.encode("utf8"), pagetext)
+            self.data.set_content(e, pagetext)
+
+        self.__output()

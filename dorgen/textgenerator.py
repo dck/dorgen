@@ -49,7 +49,7 @@ class TextGenerator:
                 del self.result[0]
         return filter(None, self.result)
 
-    def __makeSentences(self, seq, capitalize = True):
+    def __makeSentences(self, seq, capitalize = False):
         res = [' '.join(s) for s in seq]
         if capitalize: res = map(lambda word: word.capitalize(), res)
         return res

@@ -5,9 +5,9 @@
 
 
 
-<title>%key%</title>
-<meta name="Description" content="%key%">
-<meta name="Keywords" content="%key%">
+<title>Карта сайта</title>
+<meta name="Description" content="Карта сайта">
+<meta name="Keywords" content="Карта сайта">
 
 
 
@@ -30,47 +30,9 @@
          <!-- Begin Faux Columns -->
 		 <div id="faux">
 		 
-		       <!-- Begin Left Column -->
-		       <div id="leftcolumn">
-		 
-		           %Категории%  
-		 
-		       </div>
-		       <!-- End Left Column -->
-		 
 		       <!-- Begin Right Column -->
 		       <div id="rightcolumn">
-		       
-	                 
-					 
-					 <h1>%key%</h1>	 
-					 
-				     <p>
-					 
-					       %text%	<br />
-
-                           
-                           %5-случайных-ссылок-на-5-случайных-страниц%	<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-		   
-						   
-					  </p>
-		       
+		              <div class="map">%map%</div>  		       
 			   <div class="clear"></div>
 			   
 		       </div>

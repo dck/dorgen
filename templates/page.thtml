@@ -47,27 +47,17 @@
 					 
 				     <p>
 					 
-					       %text%	<br />
+					       <div class="text">%text%</div>	<br />
 
                            
-                           %5-случайных-ссылок-на-5-случайных-страниц%	<br />
+                           <div class="links">%links_5%</div>	<br />
 <br />
 <br />
 <br />
 <br />
 <br />
 <br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-		   
+%map%
 						   
 					  </p>
 		       
