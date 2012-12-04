@@ -4,6 +4,7 @@
 from pyparsing import *
 from collections import deque
 from exceptions import ParsingError
+import random
 
 class TextGenerator:
 
@@ -51,5 +52,6 @@ class TextGenerator:
 
     def __makeSentences(self, seq, capitalize = False):
         res = [' '.join(s) for s in seq]
+        random.shuffle(res)
         if capitalize: res = map(lambda word: word.capitalize(), res)
         return res

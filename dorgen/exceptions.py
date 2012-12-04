@@ -10,13 +10,13 @@ class FileError(Error):
     def __init__(self, filename):
         self.filename = filename
     def __str__(self):
-        return "[FAIL] Can't read file: %s" % self.filename
+        return "[FAIL] Can't read file: {0}".format(self.filename)
 
 class FolderAccessError(Error):
     def __init__(self, folder):
         self.folder = folder
     def __str__(self):
-        return "[FAIL] Permission denied\n[FAIL] The script can't write into: %s" % self.folder
+        return "[FAIL] Permission denied\n[FAIL] The script can't write into: {0}".format(self.folder)
 
 class GeneratedZeroTexts(Error):
     def __init__(self):
@@ -45,7 +45,7 @@ class BadTemplateGiven(Error):
     def __init__(self, reason):
         self.reason = reason
     def __str__(self):
-        return "[FAIL] Incorrect template\n[FAIL] %s" % self.reason.capitalize()
+        return "[FAIL] Incorrect template\n[FAIL] {0}".format(self.reason.capitalize())
 
 class ErrorInKeywords(Error):
     def __init__(self):

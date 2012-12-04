@@ -10,6 +10,7 @@ re_kw   = re.compile(r"%key%", re.I|re.S|re.X)
 re_text = re.compile(r"%text%", re.I|re.S|re.X)
 re_map  = re.compile(r"%map%", re.I|re.S|re.X)
 re_links  = re.compile(r"%links_(\d+)%", re.I|re.S|re.X)
+re_categories  = re.compile(r"%kategorii_(\d+)%", re.I|re.S|re.X)
 
 templates = {
     "page": "",
@@ -42,20 +43,20 @@ class Templater:
                         name = self.deploy_folder + "/" + os.path.basename(f)
                         try:
                             copytree(f, name)
-                            print "[OK] Copied folder %s to %s" % (f, name)
+                            print "[OK] Copied folder {0} to {1}".format(f, name)
                         except OSError:
                             pass
                     else:
                         copy2(f, self.deploy_folder)
-                        print "[OK] Copied %s to %s" % (f, self.deploy_folder)
+                        print "[OK] Copied {0} to {1}".format(f, self.deploy_folder)
                 except IOError as e:
-                    print "[WARN] Can't copy %s" % f
+                    print "[WARN] Can't copy {}".format(f)
             for i, v in  templates.iteritems():
                 name = i + ".thtml"
                 if os.path.exists(name) and os.path.isfile(name) and os.access(name, os.R_OK):
                     with open(name) as f:
-                        templates[i] = f.read()
-                        print "[OK] Teamplate %s has been read" % name
+                        templates[i] = f.read().decode("utf-8")
+                        print "[OK] Teamplate {} has been read".format(name)
                 else:
                     raise FileError(name)       
 
@@ -67,37 +68,74 @@ class Templater:
     def __output(self):
         with cd(self.deploy_folder):
             for e in self.data.iterable():
-                with open(e["file"], "w") as f:
-                    f.write(e["content"])
-                    print "[OK] File %s is created" % f.name
-                    #e["Created"] = True
+                self.__write_to_file(e["file"], e["content"])
             self.__make_site_map()
 
 
-    def __make_site_map(self):
-        links_str = ""
-        for e in self.data.iterable():
-            links_str += "<a href = '%s'> %s </a><br />" % (e["file"], e["keyword"].capitalize()) 
-        
-        pagetext = re.sub(re_map, links_str.encode("utf8"), templates["catalog"])
+    def __write_to_file(self, file, content):
+        with open(file, "w") as f:
+            f.write(content.encode("utf-8"))
+            print "[OK] File {0} is created".format(f.name)
 
-        with open("catalog.html", "w") as f:
-            f.write(pagetext)
-            print "[OK] Sitemap is created"
+
+    def __make_site_map(self):
+        links_str = u""
+        for e in self.data.iterable():
+            links_str += u"<a href = '{0}'> {1} </a><br />\n".format(e["file"], e["keyword"].capitalize()) 
+        
+        pagetext = re.sub(re_map, links_str, templates["catalog"])
+
+        self.__write_to_file("catalog.html", pagetext)
+   
+
+    def __make_categories(self, number):
+        result = []
+        s = u""
+        i = 1
+        n = 1
+        fulllist = [(e["keyword"], e["file"]) for e in self.data.iterable()]
+        fulllist = fulllist[::-1]
+        while fulllist:
+            e = fulllist.pop()
+            s += u"<a href = '{0}'> {1} <a/><br/>\n".format(e[1], e[0].capitalize())
+            if i >= number:
+                pagetext = re.sub(re_map, s, templates["catalog"])
+                name = "category{0}.html".format(n)
+                self.__write_to_file(name, pagetext)
+                result.append(dict(filename = name, name = u"Категория {}".format(n)))
+                s = u""
+                n += 1
+                i = 0
+            i += 1
+        if s:
+            pagetext = re.sub(re_map, s, templates["catalog"])
+            self.__write_to_file("category{}.html".format(n), pagetext)
+            result.append(dict(filename = "category{}.html".format(n), name = u"Категория {}".format(n)))
+        return result
 
     def serialize(self):
         self.__create_enviroment()
         self.__check_template()
+        categories = []
+        m = re_categories.search(templates["page"])
+        if m:
+            with cd(self.deploy_folder):
+                    categories = self.__make_categories(int(m.group(1)))
         for e in self.data.iterable():
-            pagetext = re.sub(re_kw, e["keyword"].capitalize().encode("utf8"), templates["page"])
-            pagetext = re.sub(re_text, e["text"].encode("utf8"), pagetext)
-            pagetext = re.sub(re_map, "<a href = 'catalog.html'>Карта сайта</a>", pagetext)
+            pagetext = re.sub(re_kw, e["keyword"].capitalize(), templates["page"])
+            pagetext = re.sub(re_text, e["text"], pagetext)
+            pagetext = re.sub(re_map, u"<a href = 'catalog.html'>Карта сайта</a>", pagetext)
             m = re_links.search(pagetext)
             if m:
                 self.data.make_links(int(m.group(1)))
-                links = [("<a href = '%s'> %s </a><br />" % (el, self.data.get_keyword_by_filename(el).capitalize())) for el in self.data.get_links_by_element(e)]
+                links = [(u"<a href = '{0}'>{1}</a><br />".format(el, self.data.get_keyword_by_filename(el).capitalize())) for el in self.data.get_links_by_element(e)]
                 links = '\n'.join(links)
-                pagetext = re.sub(re_links, links.encode("utf8"), pagetext)
+                pagetext = re.sub(re_links, links, pagetext)    
+
+            links = [u"<a href='{filename}'>{name}</a><br />".format(**i) for i in categories]
+            links = '\n'.join(links)
+            pagetext = re.sub(re_categories, links, pagetext)
+            
             self.data.set_content(e, pagetext)
 
         self.__output()

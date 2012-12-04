@@ -7,14 +7,14 @@ from dorgen.exceptions import Error
 
 def usage():
     s = """
-    Usage: %s <textfile> <kwfile> <template> [folder]
+    Usage: {} <textfile> <kwfile> <template> [folder]
 
     This script provides generation of texts by keywords
         <textfile> - file with template text
         <kwfile> - file with keywords
         <template> - Folder with .thtml files
         [folder] - deploy folder
-    """ % sys.argv[0]
+    """ .format(sys.argv[0])
     print s
 
 

@@ -15,15 +15,15 @@ class Dorgen:
     def __init__(self, text, kw, template = "templates", deploy = "."):
         try:
             with open(text, "r") as f:
-                self.text = f.read().decode("utf8")
+                self.text = f.read().decode("utf-8")
         except Exception as e:
             raise FileError(text)
-        print "[OK] Read %s file" % text
+        print "[OK] Read {0} file".format(text)
 
         if not os.access(kw, os.R_OK):
             raise FileError(kw)
         self.kw = kw
-        print "[OK] Read %s file" % kw
+        print "[OK] Read {0} file".format(kw)
 
         t = os.path.abspath(template)
         if not os.path.exists(t):
@@ -31,27 +31,27 @@ class Dorgen:
         if not os.access(t, os.R_OK):
             raise FolderAccessError(f)
         self.template_folder = t
-        print "[OK] Template folder is %s" % t
+        print "[OK] Template folder is {0}".format(t)
 
         f = os.path.abspath(deploy)
         if not os.path.exists(f):
             try:
                 os.makedirs(f)
-                print "     %s not found. Creating..."
+                print "     {0} not found. Creating...".format(f)
             except OSError as e:
                 raise FolderAccessError(f)              
         if not os.access(f, os.W_OK):
             raise FolderAccessError(f)
         self.deploy_folder = f
-        print "[OK] Deploy folder is %s" % f
+        print "[OK] Deploy folder is {0}".format(f)
 
 
     def run(self):
         tg = TextGenerator()
         variants = tg.generate(self.text)
-        print "[OK] Generated %d variants of the text" % len(variants) 
+        print "[OK] Generated {0} variants of the text".format(len(variants))
         kwh = KWHandler(self.kw)
-        print "[OK] Read %d keywords" % kwh.count()
+        print "[OK] Read {0} keywords".format(kwh.count())
         data = kwh.get_dg_data(variants)
         dgdata = DgData(data)
         t = Templater(template_folder = self.template_folder, tgdata = dgdata, deploy_folder = self.deploy_folder)

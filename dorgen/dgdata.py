@@ -94,7 +94,7 @@ class DgData:
     def make_links(self, number = 5):
         filenames = self.get_filenames()
         if number > len(self.data) - 1:
-            print "[WARN] You want pages to have %d links but specify only %d keywords" % (number, len(self.data))
+            print "[WARN] You want pages to have {0} links but specify only {1} keywords".format(number, len(self.data))
             number = len(self.data) - 1
         for e in self.data:
             e["links"] = []
