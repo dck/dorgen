@@ -12,6 +12,12 @@ class FileError(Error):
     def __str__(self):
         return "[FAIL] Can't read file: {0}".format(self.filename)
 
+class FolderNotFound(Error):
+    def __init__(self, folder):
+        self.folder = folder
+    def __str__(self):
+        return "[FAIL] Folder {0} not found. Check config file".format(self.folder)
+
 class FolderAccessError(Error):
     def __init__(self, folder):
         self.folder = folder
@@ -52,3 +58,9 @@ class ErrorInKeywords(Error):
         pass
     def __str__(self):
         return "[FAIL] Look at keywords file. Bad characters found"
+
+class BadConfigFileError(Error):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "[FAIL] Mistake in config file"

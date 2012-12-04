@@ -22,14 +22,14 @@ class TextGenerator:
         self.result = []
         self.grammar = template
 
-    def generate(self, template):
+    def generate(self, template, capitalize = True, shuffle = False):
         try:
             res = self.grammar.parseString(template, parseAll=True)
             self.result.append(res.asList())
         except ParseException as e:
             raise ParsingError(e)
         l = self.__processQueues()
-        return self.__makeSentences(l)
+        return self.__makeSentences(l, capitalize, shuffle)
 
     def blockAction(self, string, pos, token):
         self.blockQueue.append(token[0].asList())
@@ -50,8 +50,8 @@ class TextGenerator:
                 del self.result[0]
         return filter(None, self.result)
 
-    def __makeSentences(self, seq, capitalize = False):
+    def __makeSentences(self, seq, capitalize, shuffle):
         res = [' '.join(s) for s in seq]
-        random.shuffle(res)
-        if capitalize: res = map(lambda word: word.capitalize(), res)
+        if shuffle:    random.shuffle(res)
+        if capitalize: res = map(lambda word: word.capitalize(), res) # add smrty capitalizing
         return res
