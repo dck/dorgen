@@ -12,13 +12,20 @@ from dgdata import DgData
 
 class Dorgen:
 
-    def __init__(self, text_file, keys_file, template_folder, capitalize = 1, shuffle = 1,  **kwargs):
+    def __init__(self, text_file, keys_file, template_folder, categories_file, capitalize = 1, shuffle = 1, keyword = "%keyword%", **kwargs):
         try:
             with open(text_file, "r") as f:
                 self.text = f.read().decode("utf-8")
         except Exception as e:
             raise FileError(text_file)
         print "[OK] Read {0} file".format(text_file)
+
+        try:
+            with open(categories_file, "r") as f:
+                self.categories = f.read().decode("utf-8")
+        except Exception as e:
+            raise FileError(categories_file)
+        print "[OK] Read {0} file".format(categories_file)
 
         if not os.access(keys_file, os.R_OK):
             raise FileError(keys_file)
@@ -35,6 +42,7 @@ class Dorgen:
         
         self.capitalize = capitalize
         self.shuffle = shuffle
+        self.keyword = keyword
 
 
     def __prepare_deploy(self, deploy):
@@ -56,7 +64,7 @@ class Dorgen:
         tg = TextGenerator()
         variants = tg.generate(self.text, self.capitalize, self.shuffle)
         print "[OK] Generated {0} variants of the text".format(len(variants))
-        kwh = KWHandler(self.keys_file)
+        kwh = KWHandler(self.keys_file, self.keyword)
         print "[OK] Read {0} keywords".format(kwh.count())
         data = kwh.get_dg_data(variants)
         dgdata = DgData(data)

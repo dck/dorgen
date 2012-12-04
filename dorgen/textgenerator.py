@@ -53,5 +53,5 @@ class TextGenerator:
     def __makeSentences(self, seq, capitalize, shuffle):
         res = [' '.join(s) for s in seq]
         if shuffle:    random.shuffle(res)
-        if capitalize: res = map(lambda word: word.capitalize(), res) # add smrty capitalizing
+        if capitalize: res = map(lambda word: word.capitalize(), res) # add smarty capitalizing
         return res
