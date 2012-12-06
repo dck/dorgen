@@ -5,6 +5,7 @@ from pyparsing import *
 from collections import deque
 from exceptions import ParsingError
 import random
+import re
 
 class TextGenerator:
 
@@ -52,8 +53,12 @@ class TextGenerator:
                 del self.result[0]
         return filter(None, self.result)
 
+    def smart_capitalize(self, text):
+        rtn = re.split('([.!?] *)', text)
+        return ''.join([each.capitalize() for each in rtn])
+
     def __makeSentences(self, seq):
         res = [' '.join(s) for s in seq]
         if self.shuffle:    random.shuffle(res)
-        if self.capitalize: res = map(lambda word: word.capitalize(), res) # add smarty capitalizing
+        if self.capitalize: res = map(lambda word: self.smart_capitalize(word), res) # add smarty capitalizing
         return res
