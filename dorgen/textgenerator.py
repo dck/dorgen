@@ -8,7 +8,7 @@ import random
 
 class TextGenerator:
 
-    def __init__(self):
+    def __init__(self, capitalize = True, shuffle = True):
         _lcurl = Suppress('{')
         _rcurl = Suppress('}')
         _pipe = Suppress('|')
@@ -21,15 +21,17 @@ class TextGenerator:
         self.blockQueue = []
         self.result = []
         self.grammar = template
+        self.capitalize = capitalize
+        self.shuffle = shuffle
 
-    def generate(self, template, capitalize = True, shuffle = False):
+    def generate(self, template):
         try:
             res = self.grammar.parseString(template, parseAll=True)
             self.result.append(res.asList())
         except ParseException as e:
             raise ParsingError(e)
         l = self.__processQueues()
-        return self.__makeSentences(l, capitalize, shuffle)
+        return self.__makeSentences(l)
 
     def blockAction(self, string, pos, token):
         self.blockQueue.append(token[0].asList())
@@ -50,8 +52,8 @@ class TextGenerator:
                 del self.result[0]
         return filter(None, self.result)
 
-    def __makeSentences(self, seq, capitalize, shuffle):
+    def __makeSentences(self, seq):
         res = [' '.join(s) for s in seq]
-        if shuffle:    random.shuffle(res)
-        if capitalize: res = map(lambda word: word.capitalize(), res) # add smarty capitalizing
+        if self.shuffle:    random.shuffle(res)
+        if self.capitalize: res = map(lambda word: word.capitalize(), res) # add smarty capitalizing
         return res

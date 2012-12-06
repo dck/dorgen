@@ -5,14 +5,34 @@ from exceptions import *
 
 class KWHandler:
 
-    def __init__(self, theFile, keyword = "%keyword%"):
+    def __init__(self, theFile, keyword = "%keyword%", grouping = False ):
         self.file = theFile
         self.keyword = keyword
         with open(self.file) as f:
-            lines = f.readlines()
-        self.kws = filter(None, [e.strip().decode("utf8") for e in lines])
+            lines = [l.strip().decode("utf8") for l in f.readlines()]
+        if grouping:
+            self.kws = self.__make_list_by_groups(lines)
+        else:
+            self.kws = self.__make_simple_list(lines)
+        print self.kws
         if len(self.kws) == 0:
             raise GotZeroKeyWords()
+
+    def __make_list_by_groups(self, lines):
+        result = []
+        current_group = []
+        for line in lines:
+            if not line.strip():
+                result.append(current_group)
+                current_group = []
+            else:
+                current_group.append(line)
+        result.append(current_group)
+        return filter(None, result) 
+
+    def __make_simple_list(self, lines):
+        return filter(None, lines)
+
 
     def count(self):
         return len(self.kws)

@@ -5,9 +5,7 @@ import sys
 import json
 from dorgen import dorgen
 from dorgen.exceptions import Error
-from dorgen.config import Config
 
-config_file = "dorgen.cfg"  # as argument?
 
 def usage():
     s = """
@@ -18,13 +16,14 @@ def usage():
     """ .format(scriptname = sys.argv[0])
     print s
 
+
 if "--help" in sys.argv or len(sys.argv) < 2:
     usage()
     exit(1)
 
 try:
-    key_values = Config().load(config_file)
-    dorgen = dorgen.Dorgen(**key_values)
+    import config as c
+    dorgen = dorgen.Dorgen(c)
     dorgen.run(sys.argv[1])
     print "[OK] Script executed successfully"
 except Error as e:
