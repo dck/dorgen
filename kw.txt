@@ -1,13 +1,11 @@
+Москва
+Саров
+Арзамас
 
-privet
-hello
-hi
+Басрелона
+Мадрид
 
+Рим
+Венеция
 
-
-goodby
-bye
-
-table
-chair
-button
+Париж

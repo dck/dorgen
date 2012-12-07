@@ -5,39 +5,79 @@ import re
 import os
 from exceptions import BadTemplateGiven, FileError
 from shutil import copy2, copytree
+from mako.template import Template
 
-re_kw   = re.compile(r"%key%", re.I|re.S|re.X)
-re_text = re.compile(r"%text%", re.I|re.S|re.X)
-re_map  = re.compile(r"%map%", re.I|re.S|re.X)
-re_links  = re.compile(r"%links_(\d+)%", re.I|re.S|re.X)
-re_categories  = re.compile(r"%kategorii_(\d+)%", re.I|re.S|re.X)
 
-templates = {
-    "page": "",
-    "catalog": ""
-}
+class ITemplate:
+    pass
 
-class cd:
-    def __init__(self, newPath):
-        self.newPath = newPath
 
-    def __enter__(self):
-        self.savedPath = os.getcwd()
-        os.chdir(self.newPath)
+class Page(ITemplate):
+    def __init__(self, template_text):
+        self.template = Template(template_text)
 
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.savedPath)
+    def render(self, page_dict, global_dict):
+        return self.template.render_unicode(
+                key = page_dict["keyword"],
+                text = page_dict["text"],
+                links = page_dict["links"],
+                **global_dict
+            )
+
+
+
+class Index(ITemplate):
+    def __init__(self, template_text):
+        self.template = Template(template_text)
+
+    def __make_prev(self, text, number):
+            l = text.split(" ")[:number]
+            return ' '.join(l)
+
+    def render(self, page_iterator, words_in_preview, global_dict):
+        all_pages = [(el["keyword"], el["file"], self.__make_prev(el["text"], words_in_preview)) for el in page_iterator]
+        return self.template.render_unicode(
+                links = all_pages,
+                **global_dict
+            )
+
+class Map(ITemplate):
+    def __init__(self, template_text):
+        self.template = Template(template_text)
+
+    def render(self, name, page_list, global_dict):
+        links = [(p["keyword"], p["file"]) for p in page_list]
+        return self.template.render_unicode(
+                group_name = name,
+                links = links,
+                **global_dict
+            )
 
 class Templater:
-    def __init__(self, template_folder, tgdata, deploy_folder = "."):
+    class cd:
+        def __init__(self, newPath):
+            self.newPath = newPath
+
+        def __enter__(self):
+            self.savedPath = os.getcwd()
+            os.chdir(self.newPath)
+
+        def __exit__(self, etype, value, traceback):
+            os.chdir(self.savedPath)
+
+    def __init__(self, sitename, template_folder, templates, tgdata, deploy_folder = ".", grouping = False, words_in_preview = 10):
         self.template_folder = os.path.abspath(template_folder)
         self.data = tgdata
         self.deploy_folder = os.path.abspath(deploy_folder)
+        self.templates = templates
+        self.grouping = grouping
+        self.sitename = sitename
+        self.words_in_preview = words_in_preview
 
     def __create_enviroment(self):
-        with cd(self.template_folder):
-            templates_files = [f for f in os.listdir(".") if not f.endswith(".thtml")]
-            for f in templates_files:
+        with Templater.cd(self.template_folder):
+            additional_files = [f for f in os.listdir(".") if not f.endswith(".html")]
+            for f in additional_files:
                 try:
                     if os.path.isdir(f):
                         name = self.deploy_folder + "/" + os.path.basename(f)
@@ -51,91 +91,50 @@ class Templater:
                         print "[OK] Copied {0} to {1}".format(f, self.deploy_folder)
                 except IOError as e:
                     print "[WARN] Can't copy {}".format(f)
-            for i, v in  templates.iteritems():
-                name = i + ".thtml"
-                if os.path.exists(name) and os.path.isfile(name) and os.access(name, os.R_OK):
-                    with open(name) as f:
-                        templates[i] = f.read().decode("utf-8")
-                        print "[OK] Teamplate {} has been read".format(name)
-                else:
-                    raise FileError(name)       
+            self.templates_content = {} 
+            for t, filename in self.templates.iteritems():
+                try:
+                    with open(filename) as fh:
+                        content = fh.read().decode("utf8")
+                except:
+                    raise FileError(filename)
 
-    def __check_template(self):
-        for i, v in  templates.iteritems():
-            if v.strip() == "":
-                raise BadTemplateGiven("Template file is empty")
+                if t == "page":
+                    self.templates_content[t] = Page(content)
+                elif t == "map":
+                    self.templates_content[t] = Map(content)
+                elif t == "index":
+                    self.templates_content[t] = Index(content)
 
-    def __output(self):
-        with cd(self.deploy_folder):
-            for e in self.data.iterable():
-                self.__write_to_file(e["file"], e["content"])
-            self.__make_site_map()
-
-
-    def __write_to_file(self, file, content):
-        with open(file, "w") as f:
-            f.write(content.encode("utf-8"))
-            print "[OK] File {0} is created".format(f.name)
-
-
-    def __make_site_map(self):
-        links_str = u""
-        for e in self.data.iterable():
-            links_str += u"<a href = '{0}'> {1} </a><br />\n".format(e["file"], e["keyword"].capitalize()) 
-        
-        pagetext = re.sub(re_map, links_str, templates["catalog"])
-
-        self.__write_to_file("catalog.html", pagetext)
-   
-
-    def __make_categories(self, number):
-        result = []
-        s = u""
-        i = 1
-        n = 1
-        fulllist = [(e["keyword"], e["file"]) for e in self.data.iterable()]
-        fulllist = fulllist[::-1]
-        while fulllist:
-            e = fulllist.pop()
-            s += u"<a href = '{0}'> {1} <a/><br/>\n".format(e[1], e[0].capitalize())
-            if i >= number:
-                pagetext = re.sub(re_map, s, templates["catalog"])
-                name = "category{0}.html".format(n)
-                self.__write_to_file(name, pagetext)
-                result.append(dict(filename = name, name = u"Категория {}".format(n)))
-                s = u""
-                n += 1
-                i = 0
-            i += 1
-        if s:
-            pagetext = re.sub(re_map, s, templates["catalog"])
-            self.__write_to_file("category{}.html".format(n), pagetext)
-            result.append(dict(filename = "category{}.html".format(n), name = u"Категория {}".format(n)))
-        return result
 
     def serialize(self):
         self.__create_enviroment()
-        self.__check_template()
-        categories = []
-        m = re_categories.search(templates["page"])
-        if m:
-            with cd(self.deploy_folder):
-                    categories = self.__make_categories(int(m.group(1)))
-        for e in self.data.iterable():
-            pagetext = re.sub(re_kw, e["keyword"].capitalize(), templates["page"])
-            pagetext = re.sub(re_text, e["text"], pagetext)
-            pagetext = re.sub(re_map, u"<a href = 'catalog.html'>Карта сайта</a>", pagetext)
-            m = re_links.search(pagetext)
-            if m:
-                self.data.make_links(int(m.group(1)))
-                links = [(u"<a href = '{0}'>{1}</a><br />".format(el, self.data.get_keyword_by_filename(el).capitalize())) for el in self.data.get_links_by_element(e)]
-                links = '\n'.join(links)
-                pagetext = re.sub(re_links, links, pagetext)    
+        global_dict = dict(index_name = self.templates["index"],
+                           map_name = self.templates["map"],
+                           categories = self.data.get_categories(),
+                           sitename = self.sitename)
+        with Templater.cd(self.deploy_folder):
+            result = self.templates_content["index"].render(self.data.iterable(), self.words_in_preview, global_dict)
+            with open(global_dict["index_name"], "w") as f:
+                f.write(result.encode("utf8"))
+            print "[OK] Created {0} page".format(global_dict["index_name"])
 
-            links = [u"<a href='{filename}'>{name}</a><br />".format(**i) for i in categories]
-            links = '\n'.join(links)
-            pagetext = re.sub(re_categories, links, pagetext)
-            
-            self.data.set_content(e, pagetext)
+            result = self.templates_content["map"].render(u"Карта сайта", self.data.get_all_by_category(), global_dict)
+            with open(global_dict["map_name"], "w") as f:
+                f.write(result.encode("utf8"))
+            print "[OK] Created {0} page".format(global_dict["map_name"])
 
-        self.__output()
+            for page in self.data.iterable():
+                result = self.templates_content["page"].render(page, global_dict)
+                with open(page["file"], "w") as f:
+                     f.write(result.encode("utf8"))
+                print "[OK] Created {0} page".format(page["file"])
+            for category in self.data.icategories():
+                theList = self.data.get_all_by_category(category)
+                if theList:
+                    result = self.templates_content["map"].render(category[0], theList, global_dict)
+                    with open(category[1], "w") as f:
+                        f.write(result.encode("utf8"))
+                    print "[OK] Created {0} page".format(category[1])
+
+

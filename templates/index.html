@@ -5,9 +5,9 @@
 
 
 
-<title>%key%</title>
-<meta name="Description" content="%key%">
-<meta name="Keywords" content="%key%">
+<title>${sitename}</title>
+<meta name="Description" content="${sitename}">
+<meta name="Keywords" content="${sitename}">
 
 
 
@@ -22,7 +22,7 @@
          <!-- Begin Header -->
          <div id="header">
 		 
-		       Сайт о разном модном и не очень.		 
+		       <a href="${index_name}">Сайт о разном модном и не очень.</a>		 
 			   
 		 </div>
 		 <!-- End Header -->
@@ -32,9 +32,9 @@
 		 
 		       <!-- Begin Left Column -->
 		       <div id="leftcolumn">
-		 
-		           %kategorii_3% 
-		 
+		           %for name,link in categories:
+                        <a href="${link}">${name}</a><br />
+		           %endfor
 		       </div>
 		       <!-- End Left Column -->
 		 
@@ -42,23 +42,21 @@
 		       <div id="rightcolumn">
 		       
 	                 
-					 
-					 <h1>%key%</h1>	 
-					 
-				     <p>
-					 
-					       <div class="text">%text%</div>	<br />
-
-                           
-                           <div class="links">%links_5%</div>	<br />
+					 %for name, href, prev in links:
+                    <div class = "preview">
+                        <div class ="header">${name}</div>
+                        <div class = "prev">${prev}</div>
+                        <a href="${href}">Подробнее</a>
+                    </div>
+                     %endfor
 <br />
 <br />
 <br />
 <br />
 <br />
 <br />
-%map%
-						   
+<br />
+					   
 					  </p>
 		       
 			   <div class="clear"></div>

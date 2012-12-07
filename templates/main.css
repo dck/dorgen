@@ -32,6 +32,7 @@ body {
  height: 100px;
  margin: 10px 0px 0px 0px;
  background: #ABBEBE;
+ font-size: 25px;
 }
 #leftcolumn { 
  display: inline;
@@ -63,4 +64,14 @@ body {
 .links a:hover
 {
     color: #f99;
+}
+
+.preview{
+    border: 1px dotted #000;
+    margin: 10px;
+    padding: 5px;
+}
+.header{
+    color: #cccc33;
+    font-size:16px;
 }

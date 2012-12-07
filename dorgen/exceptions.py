@@ -64,3 +64,9 @@ class BadConfigFileError(Error):
         pass
     def __str__(self):
         return "[FAIL] Mistake in config file"
+
+class UndefinedData(Error):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "[FAIL] Got undefined datas"

@@ -22,10 +22,10 @@ class Dorgen:
 
         try:
             with open(config.categories_file, "r") as f:
-                self.categories = f.read().decode("utf-8")
+                self.categories = filter(None, [l.strip().decode("utf8") for l in f.readlines()])
         except Exception as e:
             raise FileError(config.categories_file)
-        print "[OK] Read {0} file".format(config.categories_file)
+        print "[OK] Read {0} categories".format(len(self.categories))
 
         if not os.access(config.keys_file, os.R_OK):
             raise FileError(config.keys_file)
@@ -63,8 +63,14 @@ class Dorgen:
         kwh = KWHandler(c.keys_file, c.gen_keyword, c.gen_grouping)
         print "[OK] Read {0} keywords".format(kwh.count())
         data = kwh.get_dg_data(variants)
-        dgdata = DgData(data)
-        t = Templater(template_folder = c.template_folder, tgdata = dgdata, deploy_folder = self.deploy_folder)
+        dgdata = DgData(data, self.categories, footer_links = c.footer_links, pages_in_category = c.pages_in_category)
+        t = Templater(template_folder = c.template_folder,
+                      templates = c.templates,
+                      tgdata = dgdata,
+                      deploy_folder = self.deploy_folder,
+                      sitename = c.sitename.decode("utf8"),
+                      words_in_preview = c.words_in_preview
+                      )
         t.serialize()
 
 

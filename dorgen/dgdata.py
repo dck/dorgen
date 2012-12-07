@@ -2,14 +2,59 @@
 # -*- coding: utf-8 -*-
 
 import random
-from exceptions import ErrorInKeywords
+from exceptions import ErrorInKeywords, UndefinedData
 
 class DgData:
+    def __init__(self, data, categories, footer_links = 5, pages_in_category = 10):
+        self.categories = categories
+        self.footer_links = footer_links
+        self.pages_in_category = pages_in_category
+        if data:
+            if isinstance(data[0], dict):
+                self.data = self.__split_by_categories(data)
+            elif isinstance(data[0], list):
+                self.data = data
+            else:
+                raise UndefinedData()
+        self.__make_filenames()
+        self.__make_links(footer_links)
+        self.__make_categories()
+    def __split_by_categories(self, data):
+        result = []
+        temp = []
+        for i in xrange(len(data)):
+            temp.append(data[i])
+            if len(temp) == self.pages_in_category or i == len(data)-1:
+                result.append(temp)
+                temp = []
+        return result
 
-    def __init__(self, data):
-        self.data = data
-        for e in self.data:
+    def __make_categories(self):
+        self.cat_tuples = [] #[(name, self.make_filename(name)) for name in self.categories]
+        min_data = min(len(self.data), len(self.categories))
+        for i in range(min_data):
+            self.cat_tuples.append((self.categories[i], self.make_filename(self.categories[i])))
+        for e in self.iterable():
+            e["categories"] = self.cat_tuples
+
+    def __make_filenames(self):
+        for e in self.iterable():
             e["file"] = self.make_filename(e["keyword"])
+
+    def __make_links(self, number):
+        filenames = [page for page in self.iterable()]
+        if number > self.count() - 1:
+            print "[WARN] You want pages to have {0} links but specify only {1} keywords".format(number, self.count())
+            number = self.count() - 1
+        for e in self.iterable():
+            e["links"] = []
+            i = 0
+            while i < number:
+                candidate = random.choice(filenames)
+                i+=1
+                while candidate == e or candidate["keyword"] in (l[0] for l in e["links"]):
+                    candidate = random.choice(filenames)
+                e["links"].append((candidate["keyword"], candidate["file"]))
 
     def make_filename(self, name):
         TRANSTABLE = (
@@ -70,63 +115,34 @@ class DgData:
         return translit + ".html"
 
 
-    def get_random(self, number = 1):
-        return random.sample(self.data, number)
-
-    def get_kws(self):
-        return [e["keyword"] for e in self.data if "keyword" in e]
-
     def get_filenames(self):
-        return [e["file"] for e in self.data if "file" in e]
+        return [e["file"] for e in self.iterable() if "file" in e]
 
-    def get_all(self):
-        return self.data
+    def get_key_by_filename(self, filename):
+        for page in self.iterable():
+            if page["filename"] == filename:
+                return page["keyword"]
+        return None
 
-    def __get_smth_by_e(self, element, smth):
-        l = [e for e in self.data if e == element]
-        if len(l) == 0:
-            return None
-        elif len(l) == 1:
-            return l[0][smth]
-        else:
-            return [e[text] for e in l]
-
-    def make_links(self, number = 5):
-        filenames = self.get_filenames()
-        if number > len(self.data) - 1:
-            print "[WARN] You want pages to have {0} links but specify only {1} keywords".format(number, len(self.data))
-            number = len(self.data) - 1
-        for e in self.data:
-            e["links"] = []
-            i = 0
-            while i<number:
-                candidate = random.choice(filenames)
-                i+=1
-                while candidate == e["file"] or candidate in e["links"]:
-                    candidate = random.choice(filenames)
-                e["links"].append(candidate)
-
-    def get_text_by_element(self, element):
-        return self.__get_smth_by_e(element, "text")
-
-    def get_links_by_element(self, element):
-        return self.__get_smth_by_e(element, "links")
-
-    def get_keyword_by_filename(self, filename):
-        l = [e for e in self.data if e["file"] == filename]
-        if len(l) == 0:
-            return None
-        else:
-            return l[0]["keyword"]
+    def count(self):
+        return sum(len(category) for category in self.data)
 
     def iterable(self):
-        for i in self.data:
-            yield i
-
-    def set_content(self, key, value):
         for l in self.data:
-            if key == l:
-                l["content"] = value
+            for e in l:
+                yield e
+    def icategories(self):
+        for cat_tuple in self.cat_tuples:
+            yield cat_tuple
 
-    def get_content_by_kw(self, kw):
-            return self.__get_smth_by_kw(kw, "content")
+    def get_categories(self):
+        return [c for c in self.icategories()]
+
+    def get_all_by_category(self, category_tuple = None):
+        if category_tuple:
+            category_index = self.cat_tuples.index(category_tuple)
+            return self.data[category_index]
+        else:
+            return [e for e in self.iterable()]
+
+
